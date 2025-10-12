@@ -112,7 +112,7 @@ const sidebarItems = [
 export default function Sidebar({ active, setActive }) {
   return (
     <aside
-      className="w-64 hidden md:block border-r border-slate-200 bg-white/90 backdrop-blur-lg"
+      className="w-64 hidden md:block border-r border-slate-200 bg-indigo-50 backdrop-blur-lg"
       aria-label="Main navigation"
     >
       <nav className="sticky top-6 space-y-2 px-2 py-6" role="navigation">
@@ -126,8 +126,8 @@ export default function Sidebar({ active, setActive }) {
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 
               ${
                 isActive
-                  ? "bg-indigo-50 border-l-4 border-indigo-500 shadow-sm"
-                  : "hover:bg-indigo-50 hover:translate-x-1"
+                  ? "bg-indigo-100 border-l-4 border-indigo-500 shadow-sm"
+                  : "hover:bg-indigo-100 hover:translate-x-1"
               }`}
             >
               <div
