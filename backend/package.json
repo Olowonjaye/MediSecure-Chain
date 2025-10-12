@@ -16,6 +16,7 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "lowdb": "^6.1.1",
+    "mongoose": "^8.19.1",
     "nanoid": "^4.0.2"
   },
   "devDependencies": {

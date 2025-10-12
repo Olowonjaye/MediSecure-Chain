@@ -15,7 +15,9 @@ import axios from "axios";
 // Base configuration
 // ---------------------------------------------
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  // Backend server default is PORT 4000 (see backend/server.js)
+  // Prefer VITE_API_URL (used in .env), fall back to VITE_API_BASE_URL for compatibility
+  baseURL: import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || "http://localhost:4000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -47,6 +49,24 @@ export const signupUser = async (data) => {
 export const loginUser = async (data) => {
   try {
     const res = await api.post("/auth/login", data);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || err.message;
+  }
+};
+
+export const forgotPassword = async (data) => {
+  try {
+    const res = await api.post('/auth/forgot-password', data);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || err.message;
+  }
+};
+
+export const resetPassword = async (data) => {
+  try {
+    const res = await api.post('/auth/reset-password', data);
     return res.data;
   } catch (err) {
     throw err.response?.data || err.message;

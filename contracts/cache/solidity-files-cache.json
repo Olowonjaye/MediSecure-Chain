@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\USER\\Downloads\\MEDISECURECHAIN\\contracts\\contracts\\MedisecureRegistry.sol": {
-      "lastModificationDate": 1759874964611,
-      "contentHash": "016d37c44152610bd07548105e924e42",
+      "lastModificationDate": 1760161057801,
+      "contentHash": "4fb3672c41640391410ef29f45ceeb4c",
       "sourceName": "contracts/MedisecureRegistry.sol",
       "solcConfig": {
         "version": "0.8.20",

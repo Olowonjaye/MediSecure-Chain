@@ -9,6 +9,8 @@ export default {
       colors: {
         primary: "#009688",   // medical green
         secondary: "#00695c", // deep secure green
+        'ms-accent': '#2563eb',
+        'ms-accent-600': '#1e40af',
       },
     },
   },

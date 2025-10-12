@@ -9,7 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
  *   <Route path="/doctor" element={<DoctorDashboard />} />
  * </Route>
  */
-const ProtectedRoute = ({ allowedRoles } = {}) => {
+const ProtectedRoute = ({ allowedRoles, children } = {}) => {
   const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
@@ -26,7 +26,9 @@ const ProtectedRoute = ({ allowedRoles } = {}) => {
     }
   }
 
-  // Authorized -> render child routes
+  // Authorized -> if children were passed directly, render them (current App uses this pattern), else render nested routes via Outlet
+  if (children) return children;
+
   return <Outlet />;
 };
 

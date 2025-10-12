@@ -68,7 +68,7 @@ const SidebarMobile = () => {
   const links = menuItems[role] || [];
 
   return (
-    <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-indigo-600 to-blue-500 shadow-lg text-white">
+  <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white shadow-md border-b border-primary">
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 py-3">
         <h1 className="text-lg font-bold tracking-wide">MediSecure</h1>

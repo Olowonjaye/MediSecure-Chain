@@ -37,23 +37,63 @@ This file contains focused, actionable guidance for an AI agent editing or exten
     - Start backend, run the frontend dev site, and in the browser use MetaMask (or a testnet) to invoke contract calls.
     - For contract unit tests, add Hardhat tests under `contracts/test/` and use `npx hardhat test`.
 
-- Conventions and gotchas:
-  - JS modules: backend is `type: "module"`, so use ESM imports. Contracts scripts use CommonJS (`require`) — keep the existing pattern in `contracts/scripts` when running with `npx hardhat`.
-  - ethers versions vary: contracts use `ethers` v5 (Hardhat), frontend/backend use `ethers` v6 — be careful when writing shared utilities or examples; import/usage differs between v5 and v6.
-  - Minimal security scaffolding: the backend's `reencrypt` is a stub; do not assume cryptographic correctness. Any change that replaces the stub should include tests and clear upgrade notes.
+```md
+<!-- Copilot / AI agent instructions tailored to MediSecure-Chain -->
+# MediSecure-Chain — assistant quick notes
 
-- Useful code examples to copy/paste:
-  - Generating resourceId (frontend):
-    - `const resourceId = ethers.keccak256(ethers.toUtf8Bytes(owner + cid));`
-  - Contract call pattern (frontend):
-    - `const provider = new ethers.BrowserProvider(window.ethereum);
-       const signer = await provider.getSigner();
-       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-       const tx = await contract.registerResource(...);
-       await tx.wait();`
+Keep guidance short and concrete. Use referenced files below as single source-of-truth.
 
-- When to open a PR vs. push direct edits:
-  - Small docs, README, or frontend UX text changes: open a PR.
-  - Any contract change, backend crypto changes, or dependency upgrades: open a PR with tests and deployment notes (include new `CONTRACT_ADDRESS` if contracts are redeployed).
+- Key folders
+  - `contracts/` — Hardhat (Solidity). Scripts: `contracts/scripts/deploy_registry.js`. Run from `contracts/`.
+  - `frontend/` — Vite + React (main: `frontend/src/main.jsx`, UI in `frontend/src/components`).
+  - `backend/` — Express auth & audit microservice (main: `backend/server.js`). Helper re-encrypt code in `backend/utils/reencrypt.js`.
 
-If anything in this file looks incomplete or you need examples for a specific task (tests, CI, re-encryption implementation), tell me what area to expand and I'll iterate.
+- Big picture (data flows)
+  - Upload: `frontend/src/components/UploadRecord.jsx` encrypts with Web Crypto (AES-GCM), uploads ciphertext to IPFS (`ipfs-http-client`), hashes ciphertext, then calls smart contract `registerResource(resourceId, cid, cipherHash, metadata)` via `frontend/src/services/blockchain.js`.
+  - Access control: `frontend/src/components/AccessControl.jsx` calls contract methods `grantAccess`/`revokeAccess`. Grant payloads include an encrypted key blob (in the demo this is simulated).
+  - Re-encryption: backend exposes a re-encrypt helper used by frontend to convert owner-encrypted keys into medic-specific blobs. The function `backend/utils/reencrypt.js::reencrypt()` is a stub (string concat). Treat it as placeholder — any real crypto replacement must include tests and migration notes.
+
+- Concrete developer workflows
+  - Contracts (from `contracts/`):
+    - npm install
+    - npm run compile  (runs `npx hardhat compile`)
+    - npm run deploy:blockdag  (runs `npx hardhat run scripts/deploy_registry.js --network blockdag`)
+  - Frontend (from `frontend/`):
+    - npm install
+    - npm run dev   (vite dev server)
+    - npm run build
+  - Backend (from `backend/`):
+    - npm install
+    - npm start (node server.js) — server uses lowdb JSON at `backend/db/db.json`
+
+- Project-specific conventions & gotchas
+  - Ethers versions differ: contracts use ethers v5 (Hardhat), frontend/backend use ethers v6. When writing examples, import/use the correct API (e.g., BrowserProvider is v6 browser API).
+  - ResourceId computation must be identical between components: `ethers.keccak256(ethers.toUtf8Bytes(owner + cid))`. See `frontend` for the exact usage.
+  - Contract ABI is embedded in `frontend/src/services/blockchain.js` (`MedisecureRegistry.json` under `frontend/src/abis`). If you change contracts, update this ABI and the `CONTRACT_ADDRESS` or use Vite env `VITE_CONTRACT_ADDRESS`.
+  - IPFS is used with Infura in the frontend. CI/tests should mock IPFS or run a local node.
+  - Backend is ESM (`package.json` type: module) but contract scripts use CommonJS — do not change script patterns without testing.
+
+- Integration points to inspect when changing behavior
+  - `frontend/src/services/blockchain.js` — ABI/address + contract call patterns used by UI components.
+  - `frontend/src/components/UploadRecord.jsx` — encryption, IPFS upload, resourceId formation.
+  - `frontend/src/components/AccessControl.jsx` — grant/revoke UI flow.
+  - `backend/server.js` — auth, JWT, lowdb storage, audit endpoint. Useful for local dev mocking.
+  - `backend/utils/reencrypt.js` — placeholder re-encryption logic.
+
+- Small examples (copy/paste safe)
+  - resourceId: `const resourceId = ethers.keccak256(ethers.toUtf8Bytes(owner + cid));`
+  - frontend contract call (ethers v6):
+    ```js
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    const tx = await contract.registerResource(...);
+    await tx.wait();
+    ```
+
+- When to open a PR vs. small edits
+  - Small documentation, UI text, or non-sensitive frontend tweaks: PR is preferred but small edits may be pushed.
+  - Any contract changes, backend crypto changes (including replacing `reencrypt`), or dependency upgrades: open a PR with tests, deployment notes, and updated `CONTRACT_ADDRESS` when redeployed.
+
+If anything here is unclear or you'd like expansion (CI steps, test harness, or a real re-encryption example), tell me which area and I'll extend this file.
+```

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import WalletButton from "./WalletButton";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import Logo from "../assets/medsecure-logo.png";
 
 /**
  * ------------------------------------------------------------
@@ -16,14 +18,8 @@ import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const navigate = useNavigate();
-
-  // Load user from localStorage
-  useEffect(() => {
-    const storedUser = localStorage.getItem("medisecure_user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-  }, []);
 
   const role = user?.role || "guest";
 
@@ -74,28 +70,30 @@ export default function Navbar() {
   const links = roleLinks[role] || [];
 
   return (
-    <header className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 shadow-md z-50">
+  <header className="w-full bg-gray-200 shadow-md z-50 border-b">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
-            MS
-          </div>
-          <h1 className="text-white text-lg font-semibold tracking-wide">
+          <img
+            src={Logo}
+            alt="MediSecure Logo"
+            className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
+          />
+          <h1 className="text-ms-accent-600 text-lg md:text-xl font-semibold tracking-wide">
             MediSecure Chain
           </h1>
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6 text-white/90 font-medium">
+  <div className="hidden md:flex items-center gap-6 text-slate-800 font-medium">
           {links.map((item, idx) => (
             <NavLink
               key={idx}
               to={item.path}
               className={({ isActive }) =>
                 isActive
-                  ? "underline text-white font-semibold"
-                  : "hover:text-white transition-colors"
+                  ? "underline text-slate-900 font-semibold"
+                  : "hover:text-slate-900 transition-colors"
               }
             >
               {item.name}
@@ -104,7 +102,7 @@ export default function Navbar() {
           {user && (
             <button
               onClick={handleLogout}
-              className="hover:text-red-300 transition-colors font-semibold"
+              className="text-ms-accent-600 hover:text-ms-accent font-semibold"
             >
               Logout
             </button>
@@ -114,7 +112,7 @@ export default function Navbar() {
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden text-white text-2xl"
+          className="md:hidden text-slate-800 text-2xl"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
         >
@@ -124,7 +122,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 border-t border-white/20">
+  <div className="md:hidden bg-gray-200 border-t">
           <div className="px-6 py-4 space-y-3">
             {links.map((item, idx) => (
               <NavLink
@@ -133,8 +131,8 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   isActive
-                    ? "block text-white font-semibold"
-                    : "block text-white/90 hover:text-white transition"
+                    ? "block text-slate-900 font-semibold"
+                    : "block text-slate-800 hover:text-slate-900 transition"
                 }
               >
                 {item.name}
@@ -147,7 +145,7 @@ export default function Navbar() {
                   handleLogout();
                   setOpen(false);
                 }}
-                className="block text-left w-full text-red-300 font-semibold hover:text-red-100 transition"
+                className="block text-left w-full text-red-600 font-semibold hover:text-red-700 transition"
               >
                 Logout
               </button>

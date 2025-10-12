@@ -72,7 +72,7 @@ const NurseDashboard = () => {
   }, []);
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-b from-pink-50 to-white">
+    <div className="p-6 min-h-screen bg-white">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-pink-700">🩺 Nurse Dashboard</h1>

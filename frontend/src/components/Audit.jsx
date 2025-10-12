@@ -26,16 +26,54 @@ const Audit = () => {
         const contract = new ethers.Contract(contractAddress, abi, provider);
 
         // ✅ Fetch past events (Blockchain logs)
-        const eventFilter = contract.filters.RecordUpdated();
+        // Some contract ABIs in this repo emit different event names. Try RecordUpdated first,
+        // otherwise fall back to ResourceRegistered (and other known events).
+        let eventFilter;
+        if (contract.filters && typeof contract.filters.RecordUpdated === "function") {
+          eventFilter = contract.filters.RecordUpdated();
+        } else if (contract.filters && typeof contract.filters.ResourceRegistered === "function") {
+          eventFilter = contract.filters.ResourceRegistered();
+        } else {
+          // If no known filters found, try to fetch all logs for the contract address
+          eventFilter = {};
+        }
+
         const events = await contract.queryFilter(eventFilter, 0, "latest");
 
-        const parsedLogs = events.map((event) => ({
-          id: event.transactionHash,
-          recordId: event.args.recordId.toString(),
-          updatedBy: event.args.updatedBy,
-          timestamp: new Date(Number(event.args.timestamp) * 1000).toLocaleString(),
-          txHash: event.transactionHash,
-        }));
+        const parsedLogs = events.map((event) => {
+          // event.event contains the event name when available
+          const name = event.event || "unknown";
+
+          if (name === "ResourceRegistered") {
+            return {
+              id: event.transactionHash,
+              recordId: event.args.resourceId?.toString() || "-",
+              updatedBy: event.args.owner || "-",
+              timestamp: new Date(event.blockNumber ? Date.now() : Date.now()).toLocaleString(),
+              extra: { cid: event.args.cid, cipherHash: event.args.cipherHash },
+              txHash: event.transactionHash,
+            };
+          }
+
+          if (name === "AccessGranted" || name === "AccessRevoked") {
+            return {
+              id: event.transactionHash,
+              recordId: event.args.resourceId?.toString() || "-",
+              updatedBy: event.args.grantee || "-",
+              timestamp: new Date().toLocaleString(),
+              txHash: event.transactionHash,
+            };
+          }
+
+          // Generic fallback for unknown event shapes
+          return {
+            id: event.transactionHash,
+            recordId: event.args && event.args[0] ? String(event.args[0]) : "-",
+            updatedBy: event.args && event.args[1] ? String(event.args[1]) : "-",
+            timestamp: new Date().toLocaleString(),
+            txHash: event.transactionHash,
+          };
+        });
 
         setLogs(parsedLogs.reverse());
       } catch (error) {

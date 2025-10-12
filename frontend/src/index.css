@@ -3,6 +3,32 @@
 @tailwind utilities;
 
 /* Custom global styles */
-body {
-  @apply bg-gray-100 text-gray-900 font-sans;
+:root{
+  --ms-accent: #2563eb; /* blue-600 */
+  --ms-accent-600: #1e40af; /* blue-800 */
 }
+
+body {
+  @apply bg-white text-black font-sans;
+}
+
+/* Headings and links accent */
+h1,h2,h3,h4,h5,h6{
+  color: var(--ms-accent-600);
+}
+
+a, a:visited {
+  color: var(--ms-accent);
+}
+
+/* Utility for small blue text */
+.text-ms-accent { color: var(--ms-accent); }
+.text-ms-accent-600 { color: var(--ms-accent-600); }
+
+/* Medical color utilities */
+.bg-primary { background-color: #009688; }
+.bg-primary-600 { background-color: #00796b; }
+.text-primary { color: #009688; }
+.border-primary { border-color: #009688; }
+.bg-ms-accent { background-color: var(--ms-accent); }
+.bg-ms-accent-600 { background-color: var(--ms-accent-600); }

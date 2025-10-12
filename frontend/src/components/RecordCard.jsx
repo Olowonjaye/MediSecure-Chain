@@ -68,7 +68,7 @@ export default function RecordCard({ title, cid, resourceId }) {
       <div className="mt-4 text-right">
         <button
           onClick={() => toast.info("Decrypt & View Record feature coming soon")}
-          className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-pink-500 rounded-lg shadow hover:opacity-90"
+          className="px-3 py-1.5 text-sm font-medium text-white bg-ms-accent hover:bg-ms-accent-600 rounded-lg shadow"
         >
           View Record
         </button>

@@ -18,7 +18,7 @@ const Contact = () => {
   return (
     <section
       id="contact"
-      className="relative bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 text-white py-24 overflow-hidden"
+      className="relative bg-white text-black py-24 overflow-hidden"
     >
       {/* Decorative gradient overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.25),transparent_70%)]" />
@@ -32,7 +32,7 @@ const Contact = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+            <span className="text-ms-accent">
               Get in Touch
             </span>
           </h2>
@@ -115,12 +115,12 @@ const Contact = () => {
               ></textarea>
             </div>
 
-            <Button
+            <button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg rounded-xl flex items-center justify-center gap-2 shadow-md transition"
             >
               Send Message <Send className="w-5 h-5" />
-            </Button>
+            </button>
           </motion.form>
         </div>
       </div>

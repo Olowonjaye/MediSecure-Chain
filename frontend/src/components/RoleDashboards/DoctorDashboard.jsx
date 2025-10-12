@@ -71,7 +71,7 @@ const DoctorDashboard = () => {
   }, []);
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="p-6 min-h-screen bg-white">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">

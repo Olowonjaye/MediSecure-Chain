@@ -7,9 +7,14 @@ import { ToastProvider } from "./components/ToastQueue";
 import { useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Ensure other components are imported so they are available to the bundle
+import Footer from "./components/Footer";
+
 // Core Pages
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import Contact from "./pages/Contact";
+import Support from "./pages/Support";
 
 // Lazy-Loaded Components
 const Dashboard = lazy(() => import("./components/Dashboard"));
@@ -45,7 +50,7 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 text-slate-800">
+    <div className="min-h-screen flex flex-col bg-white text-black">
 
       {/* Navbar */}
       <Navbar />
@@ -172,12 +177,16 @@ export default function App() {
               />
 
               {/* Redirects */}
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/support" element={<Support />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </main>
       </div>
       </div>
+      {/* Site footer */}
+      <Footer />
     </ToastProvider>
   );
 }

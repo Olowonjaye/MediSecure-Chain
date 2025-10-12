@@ -16,7 +16,7 @@ import { ArrowRight } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section className="relative bg-gradient-to-b from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
+  <section className="relative bg-white text-black overflow-hidden">
       {/* Animated background gradient effect */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.25),transparent_60%)]" />
 
@@ -29,7 +29,7 @@ const Hero = () => {
           className="max-w-3xl mx-auto lg:mx-0"
         >
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+            <span className="text-ms-accent-600">
               Building Trust on the Blockchain
             </span>
             <br />
