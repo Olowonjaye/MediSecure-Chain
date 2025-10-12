@@ -1,4 +1,7 @@
-# MediSecure-Chain
+medisecure.vercel.app
+
+https://medisecure.vercel.app/
+
 🏥 MediSecure: Blockchain-Powered Healthcare Data Platform
 
 Tagline: Empowering Healthcare Through Blockchain Security
@@ -125,14 +128,12 @@ Ensure wallet is funded on BlockDAG testnet:
 npx hardhat run scripts/deploy.js --network blockdag
 
 3️⃣ Start Oracle Service
-cd oracle
-node server.js
-# Runs on http://localhost:4001
+
 
 4️⃣ Start Backend
 cd backend
 npm start
-# Runs on http://localhost:5000
+# Runs on http://localhost:4000
 
 5️⃣ Start Frontend (Vite)
 cd frontend-vite
@@ -193,6 +194,6 @@ Website: coming soon
 
 Email: medisecurechain@gmail.com
 
-Network: BlockDAG (Primordial RPC)
+Network: BlockDAG 
 
 Tagline: Empowering Healthcare Through Blockchain Security.
