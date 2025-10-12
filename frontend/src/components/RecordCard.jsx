@@ -13,8 +13,11 @@ export default function RecordCard({ title, cid, resourceId }) {
     toast.success(`${label} copied to clipboard!`);
   };
 
+  // Prefer Storacha gateway if configured
+  const STORACHA_URL = import.meta.env.VITE_STORACHA_URL || "https://ipfs.io";
   const openIPFS = (cid) => {
-    const ipfsUrl = `https://ipfs.io/ipfs/${cid}`;
+    const base = STORACHA_URL.replace(/\/$/, "");
+    const ipfsUrl = `${base}/ipfs/${cid}`;
     window.open(ipfsUrl, "_blank");
   };
 

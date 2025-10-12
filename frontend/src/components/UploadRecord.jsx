@@ -1,20 +1,13 @@
 // frontend/src/components/UploadRecord.jsx
 import React, { useState } from "react";
-import { create } from "ipfs-http-client";
+import { Web3Storage } from 'web3.storage';
 import { ethers } from "ethers";
 import { registerResource } from "../services/blockchain";
 import { useToast } from "./ToastQueue";
 
-// Infura / IPFS client (uses Vite env variables)
-const projectId = import.meta.env.VITE_IPFS_PROJECT_ID;
-const projectSecret = import.meta.env.VITE_IPFS_PROJECT_SECRET;
-const auth = projectId && projectSecret ? `Basic ${btoa(`${projectId}:${projectSecret}`)}` : undefined;
-const ipfsClient = create({
-  host: "ipfs.infura.io",
-  port: 5001,
-  protocol: "https",
-  headers: auth ? { authorization: auth } : undefined,
-});
+// Web3.Storage / Storacha client token (from env)
+const web3Token = import.meta.env.VITE_STORACHA_TOKEN;
+const web3Client = web3Token ? new Web3Storage({ token: web3Token }) : null;
 
 // Helper: read file as ArrayBuffer
 async function readFileAsArrayBuffer(file) {
@@ -78,9 +71,11 @@ export default function UploadRecord() {
       // 2) Encrypt with AES-GCM
       const { combined, keyRaw } = await encryptAesGcm(fileBuf);
 
-      // 3) Upload ciphertext (iv + ct) to IPFS
-      const added = await ipfsClient.add(combined);
-      const cid = added.path || added.cid && added.cid.toString();
+  // 3) Upload ciphertext (iv + ct) to Web3.Storage (IPFS)
+  if (!web3Client) throw new Error('Missing VITE_STORACHA_TOKEN in env');
+  const fileToUpload = new File([combined], file.name + '.enc', { type: 'application/octet-stream' });
+  // put returns a CID string
+  const cid = await web3Client.put([fileToUpload], { wrapWithDirectory: false });
 
       // 4) Compute SHA-256 over ciphertext (combined)
       const cipherHash = await sha256Hex(combined.buffer);
@@ -101,8 +96,10 @@ export default function UploadRecord() {
       const resourceId = ethers.keccak256(ethers.toUtf8Bytes(owner + cid));
 
       // metadata: include basic metadata and a placeholder encryptedOwnerKey
+      // include Storacha DID so consumers can identify the storage space used
       // NOTE: the real flow should encrypt keyRaw with the owner's public key or use the Oracle.
       const ownerEncryptedKeyPlaceholder = ethers.hexlify(ethers.randomBytes(32));
+      const STORACHA_DID = import.meta.env.VITE_STORACHA_DID || null;
       const metadata = JSON.stringify({
         patientName,
         recordType,
@@ -110,6 +107,7 @@ export default function UploadRecord() {
         description,
         fileName: file.name,
         ownerEncryptedKey: ownerEncryptedKeyPlaceholder,
+        storachaDid: STORACHA_DID,
       });
 
       addToast("Registering record on-chain (transaction will be requested)...", "info");
@@ -117,10 +115,12 @@ export default function UploadRecord() {
       const receipt = await registerResource(resourceId, cid, cipherHash, metadata);
 
       addToast("✅ Record uploaded successfully", "success");
-      // Provide a small result UI (IPFS link + resourceId + tx)
-      const ipfsLink = `https://ipfs.io/ipfs/${cid}`;
-      addToast(`CID: ${cid}`, "info");
-      addToast(`IPFS: ${ipfsLink}`, "info");
+  // Provide a small result UI (Storacha/IPFS link + resourceId + tx)
+  const STORACHA_URL = import.meta.env.VITE_STORACHA_URL || "https://ipfs.io";
+  const base = STORACHA_URL.replace(/\/$/, "");
+  const ipfsLink = `${base}/ipfs/${cid}`;
+  addToast(`CID: ${cid}`, "info");
+  addToast(`Storacha IPFS: ${ipfsLink}`, "info");
       addToast(`ResourceId: ${resourceId}`, "info");
 
       // reset form
