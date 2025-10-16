@@ -1,259 +1,108 @@
-# MediSecure Chain
+🎬 Demo – MediSecureChain
+🧠 Overview
 
-## Development: Human Passport integration
+MediSecureChain is a decentralized healthcare platform that enables patients, doctors, and healthcare institutions to securely store, access, and share medical records on-chain — using Human Passport for privacy-preserving identity verification.
 
-This project includes an integration with Human Passport (https://passport.human.tech) for on-chain human verification.
+This demo walks through how users interact with the system, from secure login to accessing and sharing encrypted health records.
 
-Setup (.env)
-- Copy `.env.example` to the repository root as `.env` (or create `backend/.env`) and set the following values:
-   - HUMAN_PASSPORT_API_KEY - your Human Passport API key
-   - JWT_SECRET - a long random string used to sign JWTs
-      - DATABASE_URL - database connection string. Prefer Postgres (postgresql://...) or a MongoDB URI (mongodb://...). If empty, lowdb JSON storage is used.
+🧩 1. Login with Human Passport
 
-Important: `.env` is listed in `.gitignore` by default to avoid committing secrets.
+Flow:
 
-Run backend
-- From the `backend` folder:
+User visits the MediSecureChain homepage.
 
-```powershell
-cd backend; npm install; npm run dev
-```
+Clicks “Login with Human Passport”.
 
-Run frontend
-- From the `frontend` folder:
+Human Passport verifies the user’s real-human identity using biometric or cryptographic proof — no email or password required.
 
-```powershell
-cd frontend; npm install; npm run dev
-```
+Once verified, Human Passport returns a verification token to the app.
 
-Testing Human Passport flow
-1. Open the frontend Login page in your browser.
-2. Connect a wallet (optional) or enter an identifier/token manually on the Human Passport login form.
-3. The frontend will call the backend `/api/passport/verify` endpoint which in turn calls Human Passport and returns a JWT on success. The UI will display "Verified Human" on success or "Verification Failed" on failure.
+The backend validates the token with the Human API using your HUMAN_PASSPORT_API_KEY.
 
-Direct backend test (curl)
+If valid, the backend issues a signed JWT (JSON Web Token) to the frontend.
 
-Example (identifier):
+The frontend stores the token securely (e.g., localStorage) to manage session access.
 
-```powershell
-# Replace values and ensure your backend is running and HUMAN_PASSPORT_API_KEY is set in backend/.env
-curl -X POST http://localhost:4000/api/passport/verify -H "Content-Type: application/json" -d '{"identifier": "someone@example.com"}'
-```
+Result:
+✅ User is successfully authenticated as a verified human and redirected to their secure dashboard.
 
-Example (Human Passport token):
+🏥 2. Access the Health Dashboard
 
-```powershell
-curl -X POST http://localhost:4000/api/passport/verify -H "Content-Type: application/json" -d '{"humanPassportToken": "hp_xyz..."}'
-```
+Flow:
 
-Quick backend setup for Human Passport (Node.js)
+The dashboard loads with the user’s encrypted medical data.
 
-```powershell
-cd backend; npm install; npm run dev
-# Copy the example env and add your secrets:
-copy .env.example .env
-# Edit backend/.env and set HUMAN_PASSPORT_API_KEY and JWT_SECRET (and DATABASE_URL if using Postgres)
-```
+Each record is stored securely — either off-chain (in an encrypted DB) or on-chain (via smart contracts).
 
-Protecting medical routes
-- The backend now requires both JWT authentication and a Human Passport verified user to access patient endpoints under `/api/hospital/patients`. The middleware will return 403 if the user's `humanVerified` flag is not true.
+The user can view:
 
-medisecure.vercel.app
+Recent medical tests and results
 
-https://medisecure.vercel.app/
+Doctor consultations
 
-🏥 MediSecure: Blockchain-Powered Healthcare Data Platform
+Prescriptions and medication history
 
-Tagline: Empowering Healthcare Through Blockchain Security
+Result:
+✅ The verified user can view only their own records.
+❌ No unauthorized entity or bot can access data.
 
-📘 Executive Summary
+🔐 3. Privacy-Preserving Record Sharing
 
-MediSecure is a decentralized electronic health record (EHR) management platform that leverages blockchain and proxy re-encryption (PRE) to ensure data privacy, patient control, and interoperability across healthcare systems.
+Flow:
 
-This platform provides secure medical record storage, controlled data sharing, and transparent access logs — all on a blockchain network powered by BlockDAG.
+The user clicks “Share Record”.
 
-MediSecure empowers patients to own and control their health data, enabling authorized doctors, hospitals, and insurers to access encrypted records only with explicit consent.
+They input the doctor’s wallet address or hospital ID.
 
-💡 Problem
+The app encrypts and sends a record access request via a smart contract or secure API.
 
-Today’s healthcare systems face three critical challenges:
+The doctor receives a notification and must also verify through Human Passport.
 
-Data Fragmentation – Patient records scattered across multiple hospitals and labs.
+Upon mutual verification, temporary decryption access is granted.
 
-Data Breaches – Sensitive medical data often exposed due to centralized storage.
+Result:
+✅ Both users (patient and doctor) remain anonymous but verified.
+✅ All actions are logged immutably on-chain for transparency.
 
-Lack of Transparency – Patients cannot see who accessed or shared their data.
+👨‍⚕️ 4. Doctor or Provider Access
 
-🚀 Solution
+Flow:
 
-MediSecure solves these with blockchain, encryption, and decentralization:
+The doctor logs in via Human Passport (using the same verification mechanism).
 
-Challenge	MediSecure Solution
-Centralized storage	Data stored in Web3.Storage (IPFS) with hash references on blockchain
-Unauthorized access	Access controlled via Proxy Re-Encryption (PRE)
-Lack of transparency	Immutable audit trail of all actions (view, upload, share) on blockchain
-Poor patient control	Patient-centered architecture with cryptographic ownership keys
-🏗️ System Architecture
+Once verified, they gain limited-time access to the patient’s shared record.
 
-MediSecure comprises three layers:
+Doctors can:
 
-Layer	Description
-🧠 Smart Contract (Hardhat)	Blockchain registry that stores encrypted metadata and manages permissions using BlockDAG.
-⚙️ Oracle (Node.js)	Mock PRE oracle that re-encrypts patient records when emergency or grant access is triggered.
-🌐 Frontend (React + Vite)	User interface for patients and doctors to upload, request, and view records. Connects via MetaMask wallet.
-🖼️ System Flow Diagram
-Patient → Upload Record → IPFS (web3.storage)
-   ↓
-Store metadata hash → Blockchain Smart Contract (HealthVaultRegistry)
-   ↓
-Doctor requests access → Oracle validates and re-encrypts record key
-   ↓
-Access granted → Doctor retrieves decrypted record via Web3 gateway
+Add prescriptions
 
-🔐 Key Features
-👤 Patient Dashboard
+Upload medical reports
 
-Upload medical records (PDF, reports, prescriptions)
+Request additional data (subject to patient approval)
 
-Encrypt and store on decentralized storage
-
-Grant and revoke access to doctors
-
-🩺 Doctor Dashboard
-
-Request access to patient records
+Result:
+✅ Only verified medical professionals can access sensitive health data.
 
-View approved EHRs
+🔁 5. Blockchain Audit Trail
 
-Verify data authenticity via blockchain hash
+Every transaction (record creation, update, or access) generates an immutable log:
 
-🧩 Smart Contract Layer
+Event	Description	Verified by
+Record Added	New medical report uploaded	Patient (Human Passport verified)
+Record Shared	Access granted to Dr. A	Patient + Doctor (both verified)
+Record Viewed	Doctor opened shared record	Doctor (Human Passport verified)
 
-Manages record ownership
+Result:
+✅ Complete transparency and accountability in data handling.
 
-Tracks every access attempt
-
-Logs emergency access via events
-
-🔒 Security
-
-Proxy Re-Encryption for shared access
-
-IPFS-based immutable storage
-
-JWT authentication for backend users
-
-AES-based local encryption
-
-⚙️ Technical Stack
-Layer	Technology
-Blockchain	BlockDAG EVM-compatible Network
-Smart Contracts	Solidity (Hardhat)
-Frontend	React (Vite) + MetaMask + Ethers.js
-Backend	Node.js (Express) + MongoDB
-Oracle	Node.js + Ethers.js v6
-Storage	Web3.Storage (IPFS)
-Authentication	JWT (JSON Web Token)
-🧱 Folder Structure
-MediSecure/
-│
-├── contracts/          # Hardhat smart contracts (HealthVaultRegistry.sol)
-│   ├── scripts/
-│   └── deploy.js
-│
-├── oracle/             # Proxy re-encryption mock server (Node.js)
-│   └── server.js
-│
-├── backend/            # Node.js + MongoDB REST API
-│   ├── routes/
-│   ├── models/
-│   └── server.js
-│
-├── frontend-vite/      # React frontend with MetaMask integration
-│   ├── src/
-│   ├── components/
-│   └── App.jsx
-│
-└── README.md
-
-🧭 Deployment Steps
-1️⃣ Compile Smart Contracts
-cd contracts
-npx hardhat compile
-
-2️⃣ Deploy to BlockDAG
-
-Ensure wallet is funded on BlockDAG testnet:
-
-npx hardhat run scripts/deploy.js --network blockdag
-
-3️⃣ Start Oracle Service
-
-
-4️⃣ Start Backend
-cd backend
-npm start
-# Runs on http://localhost:4000
-
-5️⃣ Start Frontend (Vite)
-cd frontend-vite
-npm run dev
-# Open http://localhost:5173
-
-🌍 Blockchain Integration Example
-const registry = new ethers.Contract(
-  REGISTRY_ADDRESS,
-  HealthVaultRegistry.abi,
-  signer
-);
-
-// Upload new record hash
-await registry.registerRecord(patientAddress, ipfsHash);
-
-📦 Environment Variables
-Variable	Description
-BLOCKDAG_RPC	RPC endpoint for BlockDAG
-ORACLE_PRIVATE_KEY	Deployer wallet private key
-REGISTRY_ADDRESS	Deployed smart contract address
-JWT_SECRET	Token signing secret for backend
-MONGO_URI	MongoDB connection string
-💰 Business & Impact Model
-
-MediSecure targets the intersection of blockchain and healthtech, with the potential to:
-
-Digitize hospitals’ health records
-
-Enable secure telemedicine data exchange
-
-Allow insurers to verify claims via blockchain
-
-Reduce fraud and duplication in medical data
-
-Revenue Streams:
-
-Subscription model for clinics/hospitals
-
-API access for insurers and research labs
-
-Premium on-chain audit analytics
-
-👨‍💻 Team
-
-Prepared by: MediSecure Dev Team
-Led by Abdulganiyu Taofeeq
-Expertise: Blockchain • Healthcare Informatics • Security • AI Systems
-
-🏆 Vision
-
-To redefine healthcare data management in Africa and beyond —
-ensuring privacy, transparency, and patient sovereignty through blockchain technology.
-
-📬 Contact
-
-Website: coming soon
-
-Email: medisecurechain@gmail.com
-
-Network: BlockDAG 
-
-Tagline: Empowering Healthcare Through Blockchain Security.
+🧠 6. Technical Summary
+Component	Technology
+Frontend	React + Tailwind
+Backend	Node.js + Express
+Database	PostgreSQL / MongoDB
+Blockchain Layer	Ethereum-compatible (EVM)
+Identity Layer	Human Passport
+Authentication	JWT
+Data Encryption	AES or SHA-based hashing before storage
+🧪 7. Example API Flow
+🔹 Verify Human Passport Token
