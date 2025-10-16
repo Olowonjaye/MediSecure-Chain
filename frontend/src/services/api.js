@@ -84,6 +84,24 @@ export const verifyToken = async () => {
 };
 
 // ---------------------------------------------
+// HUMAN PASSPORT VERIFICATION
+// ---------------------------------------------
+export const verifyHumanPassport = async (identifierOrPayload) => {
+  try {
+    // If caller passed an object (e.g. { humanPassportToken }), forward it as-is.
+    if (typeof identifierOrPayload === 'object' && identifierOrPayload !== null) {
+      const res = await api.post('/api/passport/verify', identifierOrPayload);
+      return res.data;
+    }
+    // Otherwise assume it's a simple identifier string
+    const res = await api.post('/api/passport/verify', { identifier: identifierOrPayload });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data || err.message;
+  }
+};
+
+// ---------------------------------------------
 // MEDICAL RECORDS (EHR/EMR)
 // ---------------------------------------------
 export const getAllRecords = async () => {

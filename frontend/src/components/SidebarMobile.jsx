@@ -63,6 +63,11 @@ const SidebarMobile = () => {
       { name: "Consultations", path: "/consultant/consultations" },
       { name: "Reports", path: "/consultant/reports" },
     ],
+    patient: [
+      { name: "Dashboard", path: "/patient-dashboard" },
+      { name: "My Records", path: "/records" },
+      { name: "My EHR", path: "/ehr" },
+    ],
   };
 
   const links = menuItems[role] || [];

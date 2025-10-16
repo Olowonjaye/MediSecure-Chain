@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../services/api"; // default axios instance
+import AdminUsers from "../forms/AdminUsers";
 import { FaUserMd, FaUserNurse, FaFlask, FaPills, FaUserTie, FaUsers } from "react-icons/fa";
 
 const AdminDashboard = () => {
@@ -89,6 +90,9 @@ const AdminDashboard = () => {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mt-4">
+          <AdminUsers />
         </div>
       </section>
 

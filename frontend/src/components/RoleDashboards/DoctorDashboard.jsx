@@ -8,6 +8,7 @@ import { ethers } from "ethers";
 import { ClipboardCopy } from "lucide-react";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
+import PrescriptionForm from "../forms/PrescriptionForm";
 
 const DoctorDashboard = () => {
   const [account, setAccount] = useState("");
@@ -113,6 +114,11 @@ const DoctorDashboard = () => {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-6 p-4 bg-white rounded-xl shadow border border-slate-100">
+        <h2 className="text-lg font-semibold mb-2">Create Prescription</h2>
+        <PrescriptionForm />
       </div>
 
       {/* Empty State */}

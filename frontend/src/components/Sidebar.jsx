@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const sidebarItems = [
   {
@@ -107,9 +108,20 @@ const sidebarItems = [
       </svg>
     ),
   },
+  {
+    key: "patient",
+    label: "Patient Dashboard",
+    icon: (props) => (
+      <svg {...props} viewBox="0 0 24 24" fill="none">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M4 20v-1a4 4 0 014-4h8a4 4 0 014 4v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar({ active, setActive }) {
+  const navigate = useNavigate();
   return (
     <aside
       className="w-64 hidden md:block border-r border-slate-200 bg-indigo-50 backdrop-blur-lg"
@@ -121,7 +133,12 @@ export default function Sidebar({ active, setActive }) {
           return (
             <button
               key={item.key}
-              onClick={() => setActive(item.key)}
+              onClick={() => {
+                setActive(item.key);
+                // Navigate to specific dashboards for some keys
+                if (item.key === 'patient') navigate('/patient-dashboard');
+                if (item.key === 'records') navigate('/records');
+              }}
               aria-pressed={isActive}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 
               ${

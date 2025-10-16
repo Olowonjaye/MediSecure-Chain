@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import api from "../../services/api";
 import { FaNotesMedical, FaUserMd, FaClipboardList } from "react-icons/fa";
+import ConsultationForm from "../forms/ConsultationForm";
 
 const ConsultantDashboard = () => {
   const { user, logout } = useAuth();
@@ -139,6 +140,11 @@ const ConsultantDashboard = () => {
           </div>
         </section>
       )}
+
+      <section className="mt-6 bg-white shadow-md rounded-lg p-5">
+        <h3 className="text-lg font-semibold mb-3">Create Consultation Note</h3>
+        <ConsultationForm />
+      </section>
     </div>
   );
 };

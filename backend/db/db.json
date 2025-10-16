@@ -1,21 +1,8 @@
 {
-  "users": [
-    {
-      "id": "KEd6Hn_aSdutecm6ziv5B",
-      "name": "Abdulganiyu Taofeeq",
-      "email": "olowonjayetaoeeq@gmail.com",
-      "password": "$2a$10$7GO2o8BOfNgnGTVQRhJBpePOSwXijhWf.Dm4bi/7quTCFy.1DmTXe",
-      "role": "consultant",
-      "createdAt": 1760224266098
-    },
-    {
-      "id": "jN81huSmzOWZVggHONvJi",
-      "name": "Issah Issah",
-      "email": "love@gmail.com",
-      "password": "$2a$10$27UJNj.ZJJcgdBkAhJHkReNSW03fAtwEk647EQK5S6ZGGn61U5bN6",
-      "role": "doctor",
-      "createdAt": 1760266375679
-    }
-  ],
-  "audit": []
+  "users": [],
+  "audit": [],
+  "patients": [],
+  "appointments": [],
+  "complaints": [],
+  "emergency": []
 }

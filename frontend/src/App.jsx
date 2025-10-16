@@ -1,9 +1,8 @@
 // frontend/src/App.jsx
-import React, { lazy, Suspense, useState, useContext } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import { ToastProvider } from "./components/ToastQueue";
 import { useAuth } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -43,13 +42,36 @@ const LabDashboard = lazy(() =>
 const ConsultantDashboard = lazy(() =>
   import("./components/RoleDashboards/ConsultantDashboard")
 );
+const PatientDashboard = lazy(() => import("./components/RoleDashboards/PatientDashboard"));
 
 export default function App() {
   const [active, setActive] = useState("dashboard");
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+
+  // If user not authenticated, show only public auth pages (login/signup)
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white text-black">
+        <main className="w-full max-w-md px-6">
+          <Suspense
+            fallback={
+              <div className="p-6 bg-white rounded-2xl shadow-sm text-slate-500 text-center">Loading…</div>
+            }
+          >
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </main>
+      </div>
+    );
+  }
 
   return (
-    <ToastProvider>
     <div className="min-h-screen flex flex-col bg-white text-black">
 
       {/* Navbar */}
@@ -176,6 +198,15 @@ export default function App() {
                 }
               />
 
+              <Route
+                path="/patient-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["patient"]}>
+                    <PatientDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Redirects */}
               <Route path="/contact" element={<Contact />} />
               <Route path="/support" element={<Support />} />
@@ -184,9 +215,8 @@ export default function App() {
           </Suspense>
         </main>
       </div>
-      </div>
-      {/* Site footer */}
+      {/* site footer */}
       <Footer />
-    </ToastProvider>
+    </div>
   );
 }

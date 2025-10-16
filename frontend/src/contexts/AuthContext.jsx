@@ -51,6 +51,8 @@ export const AuthProvider = ({ children }) => {
         return "/lab-dashboard";
       case "consultant":
         return "/consultant-dashboard";
+      case "patient":
+        return "/patient-dashboard";
       default:
         return "/";
     }
@@ -87,6 +89,8 @@ export const AuthProvider = ({ children }) => {
                 return "/lab-dashboard";
               case "consultant":
                 return "/consultant-dashboard";
+              case "patient":
+                return "/patient-dashboard";
               default:
                 return "/";
             }
@@ -151,6 +155,7 @@ export const AuthProvider = ({ children }) => {
   // Function: Logout
   const logout = () => {
     localStorage.removeItem("medisecure_user");
+    localStorage.removeItem('authToken');
     setUser(null);
     addToast("You have logged out.", "info");
     navigate("/");
@@ -159,8 +164,30 @@ export const AuthProvider = ({ children }) => {
   // Keep user session active
   useEffect(() => {
     const storedUser = localStorage.getItem("medisecure_user");
-    if (storedUser) setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken && storedUser) {
+      // If we have a token and user, consider the user authenticated
+      setUser(JSON.parse(storedUser));
+    } else {
+      // Clean up any stale localStorage
+      if (!storedToken) localStorage.removeItem('medisecure_user');
+    }
   }, []);
+
+  // Helper to set user programmatically (used by HumanPassportLogin)
+  const setUserFromObject = (u) => {
+    try {
+      if (!u) {
+        localStorage.removeItem('medisecure_user');
+        setUser(null);
+        return;
+      }
+      localStorage.setItem('medisecure_user', JSON.stringify(u));
+      setUser(u);
+    } catch (e) {
+      console.warn('setUserFromObject failed', e);
+    }
+  };
 
   const value = {
     user,
@@ -169,6 +196,8 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     isAuthenticated: !!user,
+    // Expose setter so external components (e.g. wallet-based login) can update auth state
+    setUser: setUserFromObject,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

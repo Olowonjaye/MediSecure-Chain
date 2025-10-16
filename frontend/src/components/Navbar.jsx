@@ -60,6 +60,11 @@ export default function Navbar() {
       { name: "Consultations", path: "/consultant/consultations" },
       { name: "Reports", path: "/consultant/reports" },
     ],
+    patient: [
+      { name: "Dashboard", path: "/patient-dashboard" },
+      { name: "My Records", path: "/records" },
+      { name: "My EHR", path: "/ehr" },
+    ],
     guest: [
       { name: "Home", path: "/" },
       { name: "Contact", path: "/contact" },
@@ -70,7 +75,7 @@ export default function Navbar() {
   const links = roleLinks[role] || [];
 
   return (
-  <header className="w-full bg-gray-200 shadow-md z-50 border-b">
+  <header className="w-full bg-green-600 shadow-md z-50 border-b">
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-3">
@@ -79,21 +84,21 @@ export default function Navbar() {
             alt="MediSecure Logo"
             className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
           />
-          <h1 className="text-ms-accent-600 text-lg md:text-xl font-semibold tracking-wide">
+          <h1 className="text-white text-lg md:text-xl font-semibold tracking-wide">
             MediSecure Chain
           </h1>
         </div>
 
         {/* Desktop Menu */}
-  <div className="hidden md:flex items-center gap-6 text-slate-800 font-medium">
+  <div className="hidden md:flex items-center gap-6 text-white font-medium">
           {links.map((item, idx) => (
             <NavLink
               key={idx}
               to={item.path}
               className={({ isActive }) =>
                 isActive
-                  ? "underline text-slate-900 font-semibold"
-                  : "hover:text-slate-900 transition-colors"
+                  ? "underline text-white font-semibold"
+                  : "hover:text-gray-200 transition-colors"
               }
             >
               {item.name}
@@ -102,7 +107,7 @@ export default function Navbar() {
           {user && (
             <button
               onClick={handleLogout}
-              className="text-ms-accent-600 hover:text-ms-accent font-semibold"
+              className="text-white hover:text-gray-200 font-semibold"
             >
               Logout
             </button>
@@ -122,7 +127,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {open && (
-  <div className="md:hidden bg-gray-200 border-t">
+  <div className="md:hidden bg-green-600 border-t border-green-700">
           <div className="px-6 py-4 space-y-3">
             {links.map((item, idx) => (
               <NavLink
@@ -131,8 +136,8 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   isActive
-                    ? "block text-slate-900 font-semibold"
-                    : "block text-slate-800 hover:text-slate-900 transition"
+                    ? "block text-white font-semibold"
+                    : "block text-white hover:text-gray-200 transition"
                 }
               >
                 {item.name}
@@ -145,7 +150,7 @@ export default function Navbar() {
                   handleLogout();
                   setOpen(false);
                 }}
-                className="block text-left w-full text-red-600 font-semibold hover:text-red-700 transition"
+                className="block text-left w-full text-white font-semibold hover:text-gray-200 transition"
               >
                 Logout
               </button>

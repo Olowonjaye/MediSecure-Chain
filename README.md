@@ -1,3 +1,63 @@
+# MediSecure Chain
+
+## Development: Human Passport integration
+
+This project includes an integration with Human Passport (https://passport.human.tech) for on-chain human verification.
+
+Setup (.env)
+- Copy `.env.example` to the repository root as `.env` (or create `backend/.env`) and set the following values:
+   - HUMAN_PASSPORT_API_KEY - your Human Passport API key
+   - JWT_SECRET - a long random string used to sign JWTs
+      - DATABASE_URL - database connection string. Prefer Postgres (postgresql://...) or a MongoDB URI (mongodb://...). If empty, lowdb JSON storage is used.
+
+Important: `.env` is listed in `.gitignore` by default to avoid committing secrets.
+
+Run backend
+- From the `backend` folder:
+
+```powershell
+cd backend; npm install; npm run dev
+```
+
+Run frontend
+- From the `frontend` folder:
+
+```powershell
+cd frontend; npm install; npm run dev
+```
+
+Testing Human Passport flow
+1. Open the frontend Login page in your browser.
+2. Connect a wallet (optional) or enter an identifier/token manually on the Human Passport login form.
+3. The frontend will call the backend `/api/passport/verify` endpoint which in turn calls Human Passport and returns a JWT on success. The UI will display "Verified Human" on success or "Verification Failed" on failure.
+
+Direct backend test (curl)
+
+Example (identifier):
+
+```powershell
+# Replace values and ensure your backend is running and HUMAN_PASSPORT_API_KEY is set in backend/.env
+curl -X POST http://localhost:4000/api/passport/verify -H "Content-Type: application/json" -d '{"identifier": "someone@example.com"}'
+```
+
+Example (Human Passport token):
+
+```powershell
+curl -X POST http://localhost:4000/api/passport/verify -H "Content-Type: application/json" -d '{"humanPassportToken": "hp_xyz..."}'
+```
+
+Quick backend setup for Human Passport (Node.js)
+
+```powershell
+cd backend; npm install; npm run dev
+# Copy the example env and add your secrets:
+copy .env.example .env
+# Edit backend/.env and set HUMAN_PASSPORT_API_KEY and JWT_SECRET (and DATABASE_URL if using Postgres)
+```
+
+Protecting medical routes
+- The backend now requires both JWT authentication and a Human Passport verified user to access patient endpoints under `/api/hospital/patients`. The middleware will return 403 if the user's `humanVerified` flag is not true.
+
 medisecure.vercel.app
 
 https://medisecure.vercel.app/

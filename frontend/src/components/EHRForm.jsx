@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { create } from 'ipfs-http-client';
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../services/blockchain';
+import { CONTRACT_ADDRESS, CONTRACT_ABI, registerResource } from '../services/blockchain';
+import hospitalApi from '../services/hospitalApi';
 
 const client = create({ host:'ipfs.infura.io', port:5001, protocol:'https' });
 
@@ -25,22 +26,33 @@ export default function EHRForm(){
       const combined = new Uint8Array(iv.length + ct.byteLength);
       combined.set(iv,0); combined.set(new Uint8Array(ct), iv.length);
 
-      setStatus('Uploading to IPFS');
-      const added = await client.add(combined);
-      const cid = added.path;
+      setStatus('Uploading to hospital EHR');
+      // POST encrypted bytes as base64 to hospital backend
+      const base64 = btoa(String.fromCharCode(...combined));
+      const patientId = patientName || 'unknown';
+      await hospitalApi.postEHR(patientId, { payloadBase64: base64, meta: { patientName, dob } });
 
-      const hashBuf = await crypto.subtle.digest('SHA-256', combined);
-      const hashHex = ethers.hexlify(new Uint8Array(hashBuf));
-
-      if(!window.ethereum){ setStatus('MetaMask required'); return; }
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      const owner = await signer.getAddress();
-      const resourceId = ethers.keccak256(ethers.toUtf8Bytes(owner + cid));
-      const tx = await contract.registerResource(resourceId, cid, hashHex, JSON.stringify({ patientName, dob }));
-      await tx.wait();
-      setStatus('Registered '+resourceId);
+      // Optionally also store a proof on-chain for immutability if wallet is available
+      try {
+        setStatus('Uploading to IPFS for proof (optional)');
+        const added = await client.add(combined);
+        const cid = added.path;
+        const hashBuf = await crypto.subtle.digest('SHA-256', combined);
+        const hashHex = ethers.hexlify(new Uint8Array(hashBuf));
+        if (window.ethereum) {
+          const provider = new ethers.BrowserProvider(window.ethereum);
+          const signer = await provider.getSigner();
+          const owner = await signer.getAddress();
+          const resourceId = ethers.keccak256(ethers.toUtf8Bytes(owner + cid));
+          await registerResource(resourceId, cid, hashHex, JSON.stringify({ patientName, dob }));
+          setStatus('Registered proof '+resourceId);
+        } else {
+          setStatus('Hospital EHR stored (no wallet available for proof)');
+        }
+      } catch (proofErr) {
+        console.warn('Proof registration failed', proofErr);
+        setStatus('Hospital EHR stored (proof registration skipped)');
+      }
     }catch(e){
       console.error(e); setStatus('Error '+(e.message||e));
     }

@@ -8,6 +8,7 @@ import { ethers } from "ethers";
 import { ClipboardCopy } from "lucide-react";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
+import LabResultForm from "../forms/LabResultForm";
 
 const LabDashboard = () => {
   const [account, setAccount] = useState("");
@@ -120,6 +121,11 @@ const LabDashboard = () => {
           No lab reports available yet.
         </p>
       )}
+
+      <div className="mt-6 p-4 bg-white rounded-xl shadow border border-slate-100">
+        <h2 className="text-lg font-semibold mb-2">Record Lab Result</h2>
+        <LabResultForm />
+      </div>
     </div>
   );
 };

@@ -29,11 +29,20 @@ export default function Signup() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Normalize role tokens sent to backend (human-friendly UI labels -> backend tokens)
+  const normalizeRole = (r) => {
+    const key = (r || '').toLowerCase().trim();
+    if (key === 'lab scientist' || key === 'laboratory scientist') return 'lab';
+    // keep common lowercase tokens the backend expects
+    return key;
+  };
+
   // Handle signup form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await signup(form.fullName, form.email, form.password, form.role);
-    if (success) navigate("/");
+    const role = normalizeRole(form.role);
+    // AuthContext.signup already performs role-based navigation; avoid overriding it here
+    await signup(form.fullName, form.email, form.password, role);
   };
 
   return (

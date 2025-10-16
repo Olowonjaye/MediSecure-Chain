@@ -9,7 +9,8 @@
 }
 
 body {
-  @apply bg-white text-black font-sans;
+  @apply text-black font-sans;
+  background-color: #f7fafc; /* light gray fallback */
 }
 
 /* Headings and links accent */
@@ -32,3 +33,15 @@ a, a:visited {
 .border-primary { border-color: #009688; }
 .bg-ms-accent { background-color: var(--ms-accent); }
 .bg-ms-accent-600 { background-color: var(--ms-accent-600); }
+
+/* Print styles: make summary compact and remove non-essential UI */
+@media print {
+  body { background: white !important; color: black !important; }
+  /* hide interactive UI elements */
+  button, input, select, textarea, .no-print { display: none !important; }
+  /* ensure summary uses full width */
+  .print\:p-0 { padding: 0 !important; }
+  .print\:shadow-none { box-shadow: none !important; }
+  /* make the patient summary content legible */
+  .patient-summary-print { width: 100%; font-size: 12pt; }
+}

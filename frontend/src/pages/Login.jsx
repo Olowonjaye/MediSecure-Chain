@@ -5,6 +5,7 @@ import { useToast } from "../components/ToastQueue";
 import { forgotPassword, resetPassword } from "../services/api";
 import Logo from "../assets/medsecure-logo.png";
 import Hero from "../assets/medsecure-hero.png";
+import HumanPassportLogin from '../components/HumanPassportLogin';
 
 export default function Login() {
   const { login, loading } = useAuth();
@@ -158,6 +159,11 @@ export default function Login() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        {/* Human Passport button */}
+        <div className="mt-4">
+          <HumanPassportLogin onVerified={(u)=>{ console.log('Human verified user', u); }} />
+        </div>
 
         {/* Forgot password flow (client-side dev flow) */}
         <div className="mt-4 text-right">

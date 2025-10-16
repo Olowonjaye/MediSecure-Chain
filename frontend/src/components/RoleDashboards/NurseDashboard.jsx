@@ -8,6 +8,7 @@ import { ethers } from "ethers";
 import { ClipboardCopy } from "lucide-react";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
+import VitalsForm from "../forms/VitalsForm";
 
 const NurseDashboard = () => {
   const [account, setAccount] = useState("");
@@ -112,6 +113,12 @@ const NurseDashboard = () => {
               <strong>Date:</strong> {p.date}</p>
           </div>
         ))}
+      </div>
+
+      {/* Vitals form section */}
+      <div className="mt-6 p-4 bg-white rounded-xl shadow border border-slate-100">
+        <h2 className="text-lg font-semibold mb-2">Enter Vitals</h2>
+        <VitalsForm />
       </div>
 
       {/* Empty State */}
