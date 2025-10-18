@@ -356,6 +356,11 @@ const passportDeps = { dbFindUserByEmail, dbUpdateUserByEmail, dbCreateUser, sig
 const passportRouter = createPassportRouter(passportDeps);
 app.use('/api/passport', passportRouter);
 
+// Mount simple cases router (used by consultant dashboard)
+const createCasesRouter = require('./routes/cases');
+const casesRouter = createCasesRouter(verifyToken);
+app.use('/cases', casesRouter);
+
 // Create verifyHuman middleware instance
 const verifyHuman = createVerifyHuman({ dbFindUserById });
 

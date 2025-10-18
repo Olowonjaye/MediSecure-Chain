@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 // Using simple markup instead of missing UI primitives
 import { ClipboardCopy } from "lucide-react";
+import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
 import PrescriptionForm from "../forms/PrescriptionForm";

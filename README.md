@@ -106,3 +106,6 @@ Authentication	JWT
 Data Encryption	AES or SHA-based hashing before storage
 🧪 7. Example API Flow
 🔹 Verify Human Passport Token
+Vercel / SPA routing note
+---------------------------------
+When deploying the frontend as a single-page app (SPA) to Vercel, direct navigation to client-side routes like `/doctor-dashboard` can return a 404 unless you configure a rewrite to the `index.html`. This repo includes a `vercel.json` with a rewrite rule that forwards all requests to `index.html` so client-side routing works correctly.

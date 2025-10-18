@@ -66,47 +66,43 @@ export const AuthProvider = ({ children }) => {
       // Try server signup first
       try {
         const res = await signupUser({ name, email, password, role });
-        const { token, user } = res;
+        // support token key being either `token` or `jwtToken` (passport route used jwtToken elsewhere)
+        const token = res?.token || res?.jwtToken;
+        const user = res?.user || null;
+
+        if (!token || !user) {
+          // Unexpected server response
+          throw new Error('Invalid signup response from server');
+        }
+
         localStorage.setItem('authToken', token);
         localStorage.setItem('medisecure_user', JSON.stringify(user));
         setUser(user);
         addToast('Signup successful! Redirecting...', 'success');
-          // Map roles to dashboard routes
-          const rolePath = (r) => {
-            const key = (r || "").toLowerCase();
-            switch (key) {
-              case "admin":
-                return "/admin-dashboard";
-              case "doctor":
-                return "/doctor-dashboard";
-              case "nurse":
-                return "/nurse-dashboard";
-              case "pharmacist":
-                return "/pharmacist-dashboard";
-              case "lab scientist":
-              case "laboratory scientist":
-              case "lab":
-                return "/lab-dashboard";
-              case "consultant":
-                return "/consultant-dashboard";
-              case "patient":
-                return "/patient-dashboard";
-              default:
-                return "/";
-            }
-          };
-          navigate(rolePath(role));
+        // Use the role returned by the server to avoid mismatches
+        navigate(rolePath(user.role));
         return true;
       } catch (err) {
-        // Fallback to client-side demo behaviour when server unreachable
-        console.warn('Server signup failed, falling back to local demo signup', err);
-        const normalizedEmail = (email || '').toLowerCase();
-        const newUser = { name, email: normalizedEmail, role, password };
-        localStorage.setItem('medisecure_user', JSON.stringify(newUser));
-        setUser(newUser);
-        addToast('Signup successful (demo). Redirecting...', 'success');
-        navigate(rolePath(role));
-        return true;
+        // Fallback to client-side demo behaviour only in development
+        console.warn('Server signup failed', err);
+        try {
+          if (import.meta.env && import.meta.env.DEV) {
+            console.warn('Falling back to local demo signup (DEV mode)');
+            const normalizedEmail = (email || '').toLowerCase();
+            const newUser = { name, email: normalizedEmail, role, password };
+            localStorage.setItem('medisecure_user', JSON.stringify(newUser));
+            setUser(newUser);
+            addToast('Signup successful (demo). Redirecting...', 'success');
+            navigate(rolePath(role));
+            return true;
+          }
+        } catch (e) {
+          console.warn('Demo fallback failed', e);
+        }
+
+        // In production, surface the error to the user instead of silently falling back
+        addToast(err?.message || 'Signup failed. Try logging in.', 'error');
+        return false;
       }
     } catch (error) {
       addToast("Signup failed. Try again.", "error");

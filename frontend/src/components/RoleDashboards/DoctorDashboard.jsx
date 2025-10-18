@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 // simplified local UI instead of missing UI primitives
 import { ClipboardCopy } from "lucide-react";
+import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
 import PrescriptionForm from "../forms/PrescriptionForm";
@@ -35,11 +36,28 @@ const DoctorDashboard = () => {
   const fetchRecords = async () => {
     try {
       setIsLoading(true);
+      if (!CONTRACT_ADDRESS) {
+        toast.error('Contract address not configured (VITE_CONTRACT_ADDRESS)');
+        return;
+      }
+
+      if (!window.ethereum) {
+        toast.error('No Ethereum provider found. Please connect your wallet.');
+        return;
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
 
-      const fetchedRecords = await contract.getAllRecords();
+      let fetchedRecords = [];
+      try {
+        fetchedRecords = await contract.getAllRecords();
+      } catch (err) {
+        console.error('Contract call failed', err);
+        toast.error('Failed to query on-chain records.');
+        return;
+      }
       const formatted = fetchedRecords.map((r, i) => ({
         id: i + 1,
         patient: r.patient,
@@ -68,7 +86,7 @@ const DoctorDashboard = () => {
   };
 
   useEffect(() => {
-    connectWallet();
+    // Do not auto-connect on mount. Require user interaction to connect wallet.
   }, []);
 
   return (
@@ -83,9 +101,15 @@ const DoctorDashboard = () => {
           <span className="text-sm text-gray-600 truncate max-w-[180px]">
             {account ? account : "Not Connected"}
           </span>
-          <Button onClick={copyAddress} variant="outline" size="icon">
-            <ClipboardCopy size={16} />
-          </Button>
+          {!account ? (
+            <Button onClick={connectWallet} variant="solid">
+              Connect Wallet
+            </Button>
+          ) : (
+            <Button onClick={copyAddress} variant="outline" size="icon">
+              <ClipboardCopy size={16} />
+            </Button>
+          )}
         </div>
       </div>
 
