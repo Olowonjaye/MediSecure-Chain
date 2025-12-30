@@ -135,9 +135,13 @@ export default function Sidebar({ active, setActive }) {
               key={item.key}
               onClick={() => {
                 setActive(item.key);
-                // Navigate to specific dashboards for some keys
-                if (item.key === 'patient') navigate('/patient-dashboard');
+                // Navigate based on key
+                if (item.key === 'dashboard') navigate('/');
                 if (item.key === 'records') navigate('/records');
+                if (item.key === 'access') navigate('/access');
+                if (item.key === 'audit') navigate('/audit');
+                if (item.key === 'patient') navigate('/patient-dashboard');
+                if (item.key === 'support') navigate('/support');
               }}
               aria-pressed={isActive}
               className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300 

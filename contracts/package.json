@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "compile": "npx hardhat compile",
-    "deploy:blockdag": "npx hardhat run scripts/deploy_registry.js --network blockdag"
+    "deploy:blockdag": "npx hardhat run scripts/deploy.js --network blockdag"
   },
   "devDependencies": {
     "hardhat": "^2.22.5",

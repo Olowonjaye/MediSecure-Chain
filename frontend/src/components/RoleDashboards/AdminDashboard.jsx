@@ -33,6 +33,34 @@ const AdminDashboard = () => {
     return acc;
   }, {});
 
+  const [accessResourceId, setAccessResourceId] = useState('');
+  const [accessGrantee, setAccessGrantee] = useState('');
+  const [accessLoading, setAccessLoading] = useState(false);
+
+  const handleGrant = async () => {
+    if (!accessResourceId || !accessGrantee) return alert('Resource ID and grantee required');
+    try {
+      setAccessLoading(true);
+      const res = await api.post('/access/grant', { resourceId: accessResourceId, grantee: accessGrantee });
+      alert('Grant submitted: ' + (res.txHash || 'ok'));
+    } catch (e) {
+      console.error('Grant failed', e);
+      alert('Grant failed: ' + (e.message || JSON.stringify(e)));
+    } finally { setAccessLoading(false); }
+  };
+
+  const handleRevoke = async () => {
+    if (!accessResourceId || !accessGrantee) return alert('Resource ID and grantee required');
+    try {
+      setAccessLoading(true);
+      const res = await api.post('/access/revoke', { resourceId: accessResourceId, grantee: accessGrantee });
+      alert('Revoke submitted: ' + (res.txHash || 'ok'));
+    } catch (e) {
+      console.error('Revoke failed', e);
+      alert('Revoke failed: ' + (e.message || JSON.stringify(e)));
+    } finally { setAccessLoading(false); }
+  };
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading dashboard...</div>;
 
   return (
@@ -115,6 +143,20 @@ const AdminDashboard = () => {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Access Control */}
+      <section className="bg-white shadow-md rounded-lg p-5 mt-6">
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Access Control (Grant / Revoke)</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input value={accessResourceId} onChange={(e) => setAccessResourceId(e.target.value)} placeholder="resourceId (keccak/hex)" className="border rounded p-2" />
+          <input value={accessGrantee} onChange={(e) => setAccessGrantee(e.target.value)} placeholder="grantee address" className="border rounded p-2" />
+          <div className="flex gap-2">
+            <button onClick={handleGrant} disabled={accessLoading} className="bg-green-600 text-white px-3 py-2 rounded">Grant</button>
+            <button onClick={handleRevoke} disabled={accessLoading} className="bg-red-600 text-white px-3 py-2 rounded">Revoke</button>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mt-3">Granting/revoking will call the on-chain AccessManager and persist an audit entry.</p>
       </section>
     </div>
   );

@@ -8,7 +8,7 @@ import abi from "../abis/MedisecureRegistry.json";
 
 const Audit = lazy(() => import("./Audit"));
 
-export default function Dashboard({ active = "dashboard" }) {
+export default function Dashboard() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
   const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
@@ -16,7 +16,6 @@ export default function Dashboard({ active = "dashboard" }) {
   // ✅ Fetch records from blockchain
   useEffect(() => {
     const fetchRecords = async () => {
-      if (active !== "records") return;
 
       try {
         if (!window.ethereum) {
@@ -84,63 +83,7 @@ export default function Dashboard({ active = "dashboard" }) {
     };
 
     fetchRecords();
-  }, [active, contractAddress]);
-
-  // ✅ Records Page
-  if (active === "records") {
-    return (
-      <div>
-        <h2 className="text-xl font-bold text-slate-800 mb-4">
-          Encrypted Medical Records
-        </h2>
-
-        {loading ? (
-          <div className="text-gray-500 text-center mt-6">Loading records…</div>
-        ) : records.length === 0 ? (
-          <div className="text-gray-500 text-center mt-6">
-            No encrypted records found on the blockchain.
-          </div>
-        ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {records.map((rec) => (
-              <RecordCard
-                key={rec.id}
-                title={rec.title}
-                cid={rec.cid}
-                resourceId={rec.resourceId}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // ✅ Access Control Page
-  if (active === "access") {
-    return (
-      <div className="p-6 bg-white rounded-2xl shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-slate-700">
-          Manage Access Permissions
-        </h2>
-        <AccessControl />
-      </div>
-    );
-  }
-
-  // ✅ Audit Page
-  if (active === "audit") {
-    return (
-      <div className="p-6 bg-white rounded-2xl shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-slate-700">
-          Blockchain Audit Trail
-        </h2>
-        <Suspense fallback={<div className="text-slate-500">Loading Audit…</div>}>
-          <Audit />
-        </Suspense>
-      </div>
-    );
-  }
+  }, [contractAddress]);
 
   // ✅ Default Dashboard (Home View)
   return (

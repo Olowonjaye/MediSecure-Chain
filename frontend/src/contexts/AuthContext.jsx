@@ -49,6 +49,10 @@ export const AuthProvider = ({ children }) => {
       case "laboratory scientist":
       case "lab":
         return "/lab-dashboard";
+      case "researcher":
+        return "/researcher-dashboard";
+      case "auditor":
+        return "/auditor-dashboard";
       case "consultant":
         return "/consultant-dashboard";
       case "patient":

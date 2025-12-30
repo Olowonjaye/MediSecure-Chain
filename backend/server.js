@@ -14,8 +14,8 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { Low } = require('lowdb');
-const { JSONFile } = require('lowdb/node');
+const low = require('lowdb');
+const FileSync = require('lowdb/adapters/FileSync');
 const { nanoid } = require('nanoid');
 const path = require('path');
 const fs = require('fs');
@@ -31,22 +31,29 @@ const DB_DIR = path.join(__dirname, 'db');
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 
 const file = path.join(DB_DIR, 'db.json');
-const adapter = new JSONFile(file);
-// lowdb v6 requires default data to be provided to the Low constructor
+const adapter = new FileSync(file);
+// lowdb v3 requires default data to be provided to the Low constructor
 const DEFAULT_DB = { users: [], audit: [], patients: [], appointments: [], complaints: [], emergency: [] };
-const db = new Low(adapter, DEFAULT_DB);
+const db = low(adapter);
 
 async function initDB() {
-  await db.read();
-  // Ensure data exists (Low will initialize with DEFAULT_DB when missing)
-  db.data ||= DEFAULT_DB;
-  await db.write();
+  db.defaults(DEFAULT_DB).write();
 }
 // Initialize databases (lowdb + optional Mongo)
 // initDB must run before server starts to ensure lowdb file exists.
 async function startup() {
   await initDB();
   await initMongo();
+  // Start on-chain audit listener (if configured)
+  try {
+    const { startAuditListener } = require('./utils/auditListener');
+    const wsUrl = process.env.BACKEND_WS_URL || process.env.BACKEND_WEB3_WS || process.env.WS_PROVIDER_URL;
+    const auditContractAddress = process.env.AUDIT_CONTRACT_ADDRESS || process.env.AUDIT_CONTRACT || process.env.CONTRACT_ADDRESS;
+    const provider = startAuditListener({ wsUrl, contractAddress: auditContractAddress, dbAddAudit });
+    if (provider) console.log('Audit listener started');
+  } catch (e) {
+    console.warn('Failed to start audit listener', e);
+  }
   // Now start the HTTP server
   app.listen(PORT, () => console.log(`MediSecure backend running on port ${PORT}`));
 }
@@ -208,6 +215,32 @@ async function initMongo() {
         );
       `);
 
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS medisecure_access (
+          id TEXT PRIMARY KEY,
+          resourceId TEXT,
+          grantee TEXT,
+          grantedBy TEXT,
+          revokedBy TEXT,
+          txHash TEXT,
+          createdAt BIGINT
+        );
+      `);
+
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS medisecure_records (
+          id TEXT PRIMARY KEY,
+          resourceId TEXT,
+          patientId TEXT,
+          authorId TEXT,
+          data TEXT,
+          metadata JSONB,
+          cipherHash TEXT,
+          txHash TEXT,
+          createdAt BIGINT
+        );
+      `);
+
       POSTGRES_ENABLED = true;
       console.log('Connected to Postgres and ensured tables exist');
     } catch (err) {
@@ -228,7 +261,7 @@ async function dbFindUserByEmail(email) {
     return res.rows[0] || null;
   }
   if (MONGO_ENABLED && UserModel) return await UserModel.findOne({ email }).lean();
-  await db.read();
+  db.read();
   return db.data.users.find(u => u.email === email);
 }
 
@@ -238,7 +271,7 @@ async function dbFindUserById(id) {
     return res.rows[0] || null;
   }
   if (MONGO_ENABLED && UserModel) return await UserModel.findOne({ id }).lean();
-  await db.read();
+  db.read();
   return db.data.users.find(u => u.id === id);
 }
 
@@ -256,9 +289,9 @@ async function dbCreateUser(userObj) {
     await doc.save();
     return doc.toObject();
   }
-  await db.read();
+  db.read();
   db.data.users.push(userObj);
-  await db.write();
+  db.write();
   return userObj;
 }
 
@@ -280,11 +313,11 @@ async function dbUpdateUserByEmail(email, patch) {
     await doc.save();
     return doc.toObject();
   }
-  await db.read();
+  db.read();
   const idx = db.data.users.findIndex(u => u.email === email);
   if (idx === -1) return null;
   db.data.users[idx] = { ...db.data.users[idx], ...patch };
-  await db.write();
+  db.write();
   return db.data.users[idx];
 }
 
@@ -305,11 +338,11 @@ async function dbUpdateUserById(id, patch) {
     await doc.save();
     return doc.toObject();
   }
-  await db.read();
+  db.read();
   const idx = db.data.users.findIndex(u => u.id === id);
   if (idx === -1) return null;
   db.data.users[idx] = { ...db.data.users[idx], ...patch };
-  await db.write();
+  db.write();
   return db.data.users[idx];
 }
 
@@ -319,7 +352,7 @@ async function dbGetAllUsers() {
     return res.rows;
   }
   if (UserModel) return await UserModel.find({}, { password: 0, __v: 0 }).lean();
-  await db.read();
+  db.read();
   return db.data.users.map(u => ({ id: u.id, name: u.name, email: u.email, role: u.role, createdAt: u.createdAt }));
 }
 
@@ -335,15 +368,15 @@ async function dbAddAudit(entry) {
     await doc.save();
     return doc.toObject();
   }
-  await db.read();
+  db.read();
   db.data.audit.push(entry);
-  await db.write();
+  db.write();
   return entry;
 }
 
 // (JWT_SECRET and PORT declared above)
 
-const ROLES = ['nurse', 'doctor', 'pharmacist', 'lab', 'consultant', 'admin'];
+const ROLES = ['nurse', 'doctor', 'pharmacist', 'lab', 'consultant', 'admin', 'researcher', 'auditor'];
 
 // Helper: create JWT
 function signToken(user) {
@@ -351,10 +384,24 @@ function signToken(user) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '12h' });
 }
 
+// New modular verifyToken middleware (factory) - prefer using this in routes
+const createVerifyToken = require('./middleware/verifyToken');
+const verifyToken = createVerifyToken({ JWT_SECRET });
+
 // Expose db helpers & signToken for routes that need them (passport route)
 const passportDeps = { dbFindUserByEmail, dbUpdateUserByEmail, dbCreateUser, signToken, JWT_SECRET };
 const passportRouter = createPassportRouter(passportDeps);
 app.use('/api/passport', passportRouter);
+
+// Mount records router
+const createRecordsRouter = require('./routes/records');
+const recordsRouter = createRecordsRouter({ verifyToken, dbFindUserById, dbAddAudit, pgPool });
+app.use('/api/records', recordsRouter);
+
+// Mount access router
+const createAccessRouter = require('./routes/access');
+const accessRouter = createAccessRouter({ verifyToken, dbAddAudit, pgPool });
+app.use('/access', accessRouter);
 
 // Mount simple cases router (used by consultant dashboard)
 const createCasesRouter = require('./routes/cases');
@@ -377,10 +424,6 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 }
-
-// New modular verifyToken middleware (factory) - prefer using this in routes
-const createVerifyToken = require('./middleware/verifyToken');
-const verifyToken = createVerifyToken({ JWT_SECRET });
 
 // Role guard generator
 function requireRole(allowed = []) {

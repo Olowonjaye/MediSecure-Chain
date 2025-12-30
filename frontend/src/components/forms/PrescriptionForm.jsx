@@ -11,8 +11,15 @@ export default function PrescriptionForm({ patientId }){
   const submit = async e => {
     e.preventDefault();
     try{
-      await hospitalApi.postEHR(patientId || 'unknown', { type: 'prescription', medication, dose, notes, timestamp: new Date().toISOString() });
+      await api.post('/api/records', {
+        patientId: patientId || 'unknown',
+        data: { type: 'prescription', medication, dose, notes, timestamp: new Date().toISOString() },
+        metadata: { form: 'prescription' }
+      });
       addToast('Prescription saved', 'success');
+      setMedication('');
+      setDose('');
+      setNotes('');
     }catch(err){
       console.error(err);
       addToast('Failed to save prescription', 'error');

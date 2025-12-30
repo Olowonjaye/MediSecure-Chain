@@ -31,39 +31,46 @@ export default function Navbar() {
   // Define links for each role
   const roleLinks = {
     admin: [
-      { name: "Dashboard", path: "/admin/dashboard" },
-      { name: "Manage Users", path: "/admin/users" },
-      { name: "Audit Logs", path: "/admin/audit" },
+      { name: "Dashboard", path: "/admin-dashboard" },
+      { name: "Manage Users", path: "/admin-dashboard" }, // assuming admin dashboard handles users
+      { name: "Audit Logs", path: "/audit" },
     ],
     doctor: [
-      { name: "Dashboard", path: "/doctor/dashboard" },
-      { name: "Patients", path: "/doctor/patients" },
-      { name: "Reports", path: "/doctor/reports" },
+      { name: "Dashboard", path: "/doctor-dashboard" },
+      { name: "Patients", path: "/doctor-dashboard" },
+      { name: "Reports", path: "/doctor-dashboard" },
     ],
     nurse: [
-      { name: "Dashboard", path: "/nurse/dashboard" },
-      { name: "Ward Records", path: "/nurse/wards" },
-      { name: "Vitals", path: "/nurse/vitals" },
+      { name: "Dashboard", path: "/nurse-dashboard" },
+      { name: "Ward Records", path: "/nurse-dashboard" },
+      { name: "Vitals", path: "/nurse-dashboard" },
     ],
     pharmacist: [
-      { name: "Dashboard", path: "/pharmacist/dashboard" },
-      { name: "Prescriptions", path: "/pharmacist/prescriptions" },
-      { name: "Inventory", path: "/pharmacist/inventory" },
+      { name: "Dashboard", path: "/pharmacist-dashboard" },
+      { name: "Prescriptions", path: "/pharmacist-dashboard" },
+      { name: "Inventory", path: "/pharmacist-dashboard" },
     ],
     lab: [
-      { name: "Dashboard", path: "/lab/dashboard" },
-      { name: "Test Requests", path: "/lab/requests" },
-      { name: "Results", path: "/lab/results" },
+      { name: "Dashboard", path: "/lab-dashboard" },
+      { name: "Test Requests", path: "/lab-dashboard" },
+      { name: "Results", path: "/lab-dashboard" },
     ],
     consultant: [
-      { name: "Dashboard", path: "/consultant/dashboard" },
-      { name: "Consultations", path: "/consultant/consultations" },
-      { name: "Reports", path: "/consultant/reports" },
+      { name: "Dashboard", path: "/consultant-dashboard" },
+      { name: "Consultations", path: "/consultant-dashboard" },
+      { name: "Reports", path: "/consultant-dashboard" },
     ],
     patient: [
       { name: "Dashboard", path: "/patient-dashboard" },
       { name: "My Records", path: "/records" },
       { name: "My EHR", path: "/ehr" },
+    ],
+    auditor: [
+      { name: "Dashboard", path: "/auditor-dashboard" },
+      { name: "Audit Logs", path: "/audit" },
+    ],
+    researcher: [
+      { name: "Dashboard", path: "/researcher-dashboard" },
     ],
     guest: [
       { name: "Home", path: "/" },

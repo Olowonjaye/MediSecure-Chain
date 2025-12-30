@@ -26,19 +26,7 @@ const Audit = () => {
         const contract = new ethers.Contract(contractAddress, abi, provider);
 
         // ✅ Fetch past events (Blockchain logs)
-        // Some contract ABIs in this repo emit different event names. Try RecordUpdated first,
-        // otherwise fall back to ResourceRegistered (and other known events).
-        let eventFilter;
-        if (contract.filters && typeof contract.filters.RecordUpdated === "function") {
-          eventFilter = contract.filters.RecordUpdated();
-        } else if (contract.filters && typeof contract.filters.ResourceRegistered === "function") {
-          eventFilter = contract.filters.ResourceRegistered();
-        } else {
-          // If no known filters found, try to fetch all logs for the contract address
-          eventFilter = {};
-        }
-
-        const events = await contract.queryFilter(eventFilter, 0, "latest");
+        const events = await contract.queryFilter({}, 0, "latest");
 
         const parsedLogs = events.map((event) => {
           // event.event contains the event name when available

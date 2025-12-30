@@ -33,7 +33,7 @@ const AccessControl = () => {
       setLoading(true);
       const contract = await getWriteContract();
       const tx = await contract.grantAccess(
-        ethers.encodeBytes32String(resourceId),
+        resourceId.startsWith('0x') ? resourceId : ethers.encodeBytes32String(resourceId),
         grantee,
         ethers.getBytes(encryptedKey)
       );
@@ -63,7 +63,7 @@ const AccessControl = () => {
       setLoading(true);
       const contract = await getWriteContract();
       const tx = await contract.revokeAccess(
-        ethers.encodeBytes32String(resourceId),
+        resourceId.startsWith('0x') ? resourceId : ethers.encodeBytes32String(resourceId),
         grantee
       );
       await tx.wait();

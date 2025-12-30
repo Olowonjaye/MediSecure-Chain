@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
 import PrescriptionForm from "../forms/PrescriptionForm";
+import api from "../../services/api";
 
 const PharmacistDashboard = () => {
   const [account, setAccount] = useState("");
@@ -36,6 +37,16 @@ const PharmacistDashboard = () => {
   const fetchPrescriptions = async () => {
     try {
       setIsLoading(true);
+      if (!CONTRACT_ADDRESS) {
+        toast.error('Contract address not configured (VITE_CONTRACT_ADDRESS)');
+        return;
+      }
+
+      if (!window.ethereum) {
+        toast.error('No Ethereum provider found. Please connect your wallet.');
+        return;
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
@@ -59,6 +70,15 @@ const PharmacistDashboard = () => {
     }
   };
 
+  const fetchPrescriptionsBackend = async () => {
+    try {
+      const res = await api.get('/api/prescriptions').catch(() => ({ data: [] }));
+      setPrescriptions(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.warn('Failed to fetch backend prescriptions', e.message || e);
+    }
+  };
+
   // ============================
   // Copy Wallet Address
   // ============================
@@ -70,7 +90,11 @@ const PharmacistDashboard = () => {
   };
 
   useEffect(() => {
-    connectWallet();
+    // Do not auto-connect wallet on mount. Require explicit user action to connect.
+  }, []);
+
+  useEffect(() => {
+    fetchPrescriptionsBackend();
   }, []);
 
   return (
@@ -94,6 +118,7 @@ const PharmacistDashboard = () => {
         <Button onClick={fetchPrescriptions} disabled={isLoading}>
           {isLoading ? "Loading..." : "View Prescriptions"}
         </Button>
+        <Button onClick={fetchPrescriptionsBackend} variant="outline">Refresh (Backend)</Button>
       </div>
 
       {/* Prescriptions Display */}

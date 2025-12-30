@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
 import PrescriptionForm from "../forms/PrescriptionForm";
+import api from "../../services/api";
 
 const DoctorDashboard = () => {
   const [account, setAccount] = useState("");
@@ -75,6 +76,16 @@ const DoctorDashboard = () => {
     }
   };
 
+  // Fetch patients from backend (Postgres/lowdb)
+  const fetchPatientsFromBackend = async () => {
+    try {
+      const res = await api.get('/api/hospital/patients');
+      if (Array.isArray(res.data)) setRecords(res.data);
+    } catch (e) {
+      // ignore; on-chain fallback exists
+    }
+  };
+
   // ============================
   // Copy Address to Clipboard
   // ============================
@@ -87,6 +98,11 @@ const DoctorDashboard = () => {
 
   useEffect(() => {
     // Do not auto-connect on mount. Require user interaction to connect wallet.
+  }, []);
+
+  useEffect(() => {
+    // attempt to hydrate backend patient list
+    fetchPatientsFromBackend();
   }, []);
 
   return (
@@ -118,6 +134,7 @@ const DoctorDashboard = () => {
         <Button onClick={fetchRecords} disabled={isLoading}>
           {isLoading ? "Loading Records..." : "View Patient Records"}
         </Button>
+        <Button onClick={fetchPatientsFromBackend} variant="outline">Refresh Patients (Backend)</Button>
       </div>
 
       {/* Records Section */}

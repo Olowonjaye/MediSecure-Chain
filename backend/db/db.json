@@ -4,5 +4,15 @@
   "patients": [],
   "appointments": [],
   "complaints": [],
-  "emergency": []
+  "emergency": [],
+  "cases": [
+    {
+      "id": "QMs9TxQwuFT9tRrxnEsI0",
+      "patientName": "Jane Doe",
+      "symptoms": "Fever, cough",
+      "assignedTo": null,
+      "assignedAt": 1766639366158,
+      "diagnosis": null
+    }
+  ]
 }

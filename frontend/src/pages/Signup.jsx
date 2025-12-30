@@ -22,6 +22,8 @@ export default function Signup() {
     "Pharmacist",
     "Lab Scientist",
     "Consultant",
+    "Researcher",
+    "Auditor",
   ];
 
   // Handle form input change

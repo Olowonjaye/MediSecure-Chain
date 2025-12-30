@@ -25,6 +25,20 @@ const ConsultantDashboard = () => {
     loadConsultantCases();
   }, []);
 
+  // Research requests area
+  const [researchRequests, setResearchRequests] = useState([]);
+  useEffect(() => {
+    const loadResearch = async () => {
+      try {
+        const r = await api.get('/research/requests').catch(() => ({ data: [] }));
+        setResearchRequests(Array.isArray(r.data) ? r.data : []);
+      } catch (e) {
+        console.warn('Failed to load research requests', e.message || e);
+      }
+    };
+    loadResearch();
+  }, []);
+
   const handleSelectCase = (c) => {
     setSelectedCase(c);
     setDiagnosis(c.diagnosis || "");
@@ -144,6 +158,34 @@ const ConsultantDashboard = () => {
       <section className="mt-6 bg-white shadow-md rounded-lg p-5">
         <h3 className="text-lg font-semibold mb-3">Create Consultation Note</h3>
         <ConsultationForm />
+      </section>
+
+      <section className="mt-6 bg-white shadow-md rounded-lg p-5">
+        <h3 className="text-lg font-semibold mb-3">Research Requests</h3>
+        {researchRequests.length === 0 ? (
+          <p className="text-gray-500">No research requests at the moment.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-700 border">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="py-2 px-3 border">Title</th>
+                  <th className="py-2 px-3 border">Requester</th>
+                  <th className="py-2 px-3 border">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {researchRequests.map((r) => (
+                  <tr key={r.id} className="hover:bg-gray-50">
+                    <td className="py-2 px-3 border">{r.title}</td>
+                    <td className="py-2 px-3 border">{r.requester}</td>
+                    <td className="py-2 px-3 border">{r.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );

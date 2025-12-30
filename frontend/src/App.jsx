@@ -18,6 +18,7 @@ import Support from "./pages/Support";
 // Lazy-Loaded Components
 const Dashboard = lazy(() => import("./components/Dashboard"));
 const Records = lazy(() => import("./components/Records"));
+const RecordViewer = lazy(() => import("./components/RecordViewer"));
 const Audit = lazy(() => import("./components/Audit"));
 const AccessControl = lazy(() => import("./components/AccessControl"));
 const EHRForm = lazy(() => import("./components/EHRForm"));
@@ -43,6 +44,8 @@ const ConsultantDashboard = lazy(() =>
   import("./components/RoleDashboards/ConsultantDashboard")
 );
 const PatientDashboard = lazy(() => import("./components/RoleDashboards/PatientDashboard"));
+const ResearcherDashboard = lazy(() => import("./components/RoleDashboards/ResearcherDashboard"));
+const AuditorDashboard = lazy(() => import("./components/RoleDashboards/AuditorDashboard"));
 
 export default function App() {
   const [active, setActive] = useState("dashboard");
@@ -112,6 +115,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Records />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/records/:id"
+                element={
+                  <ProtectedRoute>
+                    <RecordViewer />
                   </ProtectedRoute>
                 }
               />
@@ -194,6 +205,24 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={["consultant"]}>
                     <ConsultantDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/researcher-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["researcher"]}>
+                    <ResearcherDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/auditor-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["auditor"]}>
+                    <AuditorDashboard />
                   </ProtectedRoute>
                 }
               />

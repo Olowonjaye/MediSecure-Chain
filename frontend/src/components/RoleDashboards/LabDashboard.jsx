@@ -6,9 +6,11 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 // simplified local UI instead of missing components
 import { ClipboardCopy } from "lucide-react";
+import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
 import LabResultForm from "../forms/LabResultForm";
+import api from "../../services/api";
 
 const LabDashboard = () => {
   const [account, setAccount] = useState("");
@@ -35,6 +37,16 @@ const LabDashboard = () => {
   const fetchLabReports = async () => {
     try {
       setIsLoading(true);
+      if (!CONTRACT_ADDRESS) {
+        toast.error('Contract address not configured (VITE_CONTRACT_ADDRESS)');
+        return;
+      }
+
+      if (!window.ethereum) {
+        toast.error('No Ethereum provider found. Please connect your wallet.');
+        return;
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
@@ -57,6 +69,15 @@ const LabDashboard = () => {
     }
   };
 
+  const fetchLabReportsBackend = async () => {
+    try {
+      const res = await api.get('/api/lab/reports').catch(() => ({ data: [] }));
+      setLabReports(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.warn('Failed to fetch backend lab reports', e.message || e);
+    }
+  };
+
   // ============================
   // Copy Wallet Address
   // ============================
@@ -68,7 +89,11 @@ const LabDashboard = () => {
   };
 
   useEffect(() => {
-    connectWallet();
+    // Do not auto-connect on mount. Let user click Connect Wallet instead.
+  }, []);
+
+  useEffect(() => {
+    fetchLabReportsBackend();
   }, []);
 
   return (
@@ -94,6 +119,7 @@ const LabDashboard = () => {
         <Button onClick={fetchLabReports} disabled={isLoading}>
           {isLoading ? "Loading Reports..." : "View Lab Reports"}
         </Button>
+        <Button onClick={fetchLabReportsBackend} variant="outline">Refresh (Backend)</Button>
       </div>
 
       {/* Reports Section */}

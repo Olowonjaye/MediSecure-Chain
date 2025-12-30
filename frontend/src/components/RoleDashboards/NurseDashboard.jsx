@@ -6,9 +6,11 @@ import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
 // Using simple markup to avoid missing ui components
 import { ClipboardCopy } from "lucide-react";
+import { Button } from "../ui/button";
 import { toast } from "react-toastify";
 import contractABI from "../../abis/MedisecureRegistry.json";
 import VitalsForm from "../forms/VitalsForm";
+import api from "../../services/api";
 
 const NurseDashboard = () => {
   const [account, setAccount] = useState("");
@@ -35,6 +37,16 @@ const NurseDashboard = () => {
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
+      if (!CONTRACT_ADDRESS) {
+        toast.error('Contract address not configured (VITE_CONTRACT_ADDRESS)');
+        return;
+      }
+
+      if (!window.ethereum) {
+        toast.error('No Ethereum provider found. Please connect your wallet.');
+        return;
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
@@ -58,6 +70,15 @@ const NurseDashboard = () => {
     }
   };
 
+  const fetchPatientsBackend = async () => {
+    try {
+      const res = await api.get('/api/hospital/patients');
+      setPatients(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.warn('Failed to load backend patients', e.message || e);
+    }
+  };
+
   // ============================
   // Copy Wallet Address
   // ============================
@@ -69,7 +90,11 @@ const NurseDashboard = () => {
   };
 
   useEffect(() => {
-    connectWallet();
+    // Require explicit wallet connection by the user
+  }, []);
+
+  useEffect(() => {
+    fetchPatientsBackend();
   }, []);
 
   return (
@@ -93,6 +118,7 @@ const NurseDashboard = () => {
         <Button onClick={fetchPatients} disabled={isLoading}>
           {isLoading ? "Loading..." : "View Patient Records"}
         </Button>
+        <Button onClick={fetchPatientsBackend} variant="outline">Refresh (Backend)</Button>
       </div>
 
       {/* Patient Records Display */}
